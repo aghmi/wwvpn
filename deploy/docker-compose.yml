@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: wwvpn
+      POSTGRES_PASSWORD: wwvpn
+      POSTGRES_DB: wwvpn
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../migrations/000001_init.up.sql:/docker-entrypoint-initdb.d/001_init.sql
+      - ../migrations/000002_connections_keys.up.sql:/docker-entrypoint-initdb.d/002_connections_keys.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wwvpn"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.api
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: "5432"
+      DATABASE_USER: wwvpn
+      DATABASE_PASSWORD: wwvpn
+      DATABASE_NAME: wwvpn
+      DATABASE_SSLMODE: disable
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      JWT_SECRET: "change-me-jwt-secret-32-chars!!"
+      JWT_TTL: "10080"
+      ADMIN_API_KEY: "wwvpn-admin-secret-key-change-me"
+      SERVER_PORT: "8080"
+      SERVER_MODE: release
+
+volumes:
+  pgdata:

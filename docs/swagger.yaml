@@ -1,0 +1,540 @@
+basePath: /api/v1
+definitions:
+  dto.AddServerRequest:
+    properties:
+      awg_port:
+        type: integer
+      awg_public_key:
+        type: string
+      camouflage_domain:
+        type: string
+      capacity:
+        type: integer
+      city:
+        type: string
+      country:
+        type: string
+      grpc_port:
+        type: integer
+      hostname:
+        type: string
+      ip_address:
+        type: string
+      is_premium:
+        type: boolean
+      vless_port:
+        type: integer
+      vless_public_key:
+        type: string
+      vless_short_id:
+        type: string
+    required:
+    - awg_port
+    - awg_public_key
+    - city
+    - country
+    - grpc_port
+    - hostname
+    - ip_address
+    - vless_port
+    - vless_public_key
+    - vless_short_id
+    type: object
+  dto.AdminServerResponse:
+    properties:
+      active_connections:
+        type: integer
+      city:
+        type: string
+      country:
+        type: string
+      hostname:
+        type: string
+      id:
+        type: string
+      ip_address:
+        type: string
+      is_active:
+        type: boolean
+      is_premium:
+        type: boolean
+    type: object
+  dto.AuthResponse:
+    properties:
+      device_id:
+        type: string
+      expire_at:
+        type: integer
+      token:
+        type: string
+    type: object
+  dto.ConnectRequest:
+    properties:
+      client_public_key:
+        type: string
+      protocol:
+        enum:
+        - amnezia_wg
+        - vless_reality
+        - auto
+        type: string
+      server_id:
+        type: string
+    required:
+    - client_public_key
+    - protocol
+    - server_id
+    type: object
+  dto.ConnectResponse:
+    properties:
+      allowed_ips:
+        type: string
+      assigned_ip:
+        type: string
+      connection_id:
+        type: string
+      dns:
+        type: string
+      endpoint:
+        type: string
+      fallback:
+        $ref: '#/definitions/dto.FallbackConfig'
+      mtu:
+        type: integer
+      obfuscation:
+        $ref: '#/definitions/dto.ObfuscationParams'
+      protocol:
+        type: string
+      server_public_key:
+        type: string
+      vless:
+        $ref: '#/definitions/dto.VLESSParams'
+    type: object
+  dto.DeviceAuthRequest:
+    properties:
+      device_id:
+        type: string
+    required:
+    - device_id
+    type: object
+  dto.DisconnectRequest:
+    properties:
+      connection_id:
+        type: string
+    required:
+    - connection_id
+    type: object
+  dto.FallbackConfig:
+    properties:
+      assigned_ip:
+        type: string
+      connection_id:
+        type: string
+      endpoint:
+        type: string
+      obfuscation:
+        $ref: '#/definitions/dto.ObfuscationParams'
+      protocol:
+        type: string
+      server_public_key:
+        type: string
+      vless:
+        $ref: '#/definitions/dto.VLESSParams'
+    type: object
+  dto.ObfuscationParams:
+    properties:
+      h1:
+        type: integer
+      h2:
+        type: integer
+      h3:
+        type: integer
+      h4:
+        type: integer
+      jc:
+        type: integer
+      jmax:
+        type: integer
+      jmin:
+        type: integer
+      s1:
+        type: integer
+      s2:
+        type: integer
+    type: object
+  dto.ServerListResponse:
+    properties:
+      servers:
+        items:
+          $ref: '#/definitions/dto.ServerResponse'
+        type: array
+    type: object
+  dto.ServerResponse:
+    properties:
+      capacity:
+        type: integer
+      city:
+        type: string
+      country:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      is_premium:
+        type: boolean
+      load:
+        type: integer
+      protocols:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.SetActiveRequest:
+    properties:
+      active:
+        type: boolean
+    type: object
+  dto.VLESSParams:
+    properties:
+      port:
+        type: integer
+      public_key:
+        type: string
+      short_id:
+        type: string
+      sni:
+        type: string
+      uuid:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: VPN backend API with AmneziaWG and VLESS+Reality protocols
+  title: wwvpn API
+  version: "1.0"
+paths:
+  /admin/servers:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/dto.AdminServerResponse'
+              type: array
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - AdminKey: []
+      summary: List all servers (admin)
+      tags:
+      - admin
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Server details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddServerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - AdminKey: []
+      summary: Add VPN server (admin)
+      tags:
+      - admin
+  /admin/servers/{id}:
+    delete:
+      parameters:
+      - description: Server UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - AdminKey: []
+      summary: Remove VPN server (admin)
+      tags:
+      - admin
+  /admin/servers/{id}/active:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Server UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Active status
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SetActiveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - AdminKey: []
+      summary: Set server active/inactive (admin)
+      tags:
+      - admin
+  /auth/account:
+    delete:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete account
+      tags:
+      - auth
+  /auth/device:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Device ID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DeviceAuthRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Authenticate device
+      tags:
+      - auth
+  /connect:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Connection params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ConnectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ConnectResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Connect to VPN server
+      tags:
+      - connect
+  /connect/disconnect:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Connection ID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DisconnectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Disconnect from VPN server
+      tags:
+      - connect
+  /servers:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ServerListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List active VPN servers
+      tags:
+      - servers
+  /subscription/status:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get subscription status
+      tags:
+      - subscription
+  /webhook/revenuecat:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "501":
+          description: Not Implemented
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: RevenueCat webhook
+      tags:
+      - subscription
+securityDefinitions:
+  AdminKey:
+    in: header
+    name: X-Admin-Key
+    type: apiKey
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

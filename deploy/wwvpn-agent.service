@@ -1,0 +1,31 @@
+[Unit]
+Description=wwvpn Node Agent
+After=network.target awg-quick@awg0.service xray.service
+Wants=awg-quick@awg0.service xray.service
+
+[Service]
+Type=simple
+EnvironmentFile=/opt/wwvpn/node-config.env
+ExecStart=/opt/wwvpn/wwvpn-node-agent \
+  -port=${GRPC_PORT} \
+  -awg-interface=awg0 \
+  -awg-port=${AWG_PORT} \
+  -awg-pubkey=${AWG_PUBLIC_KEY} \
+  -jc=${AWG_JC} \
+  -jmin=${AWG_JMIN} \
+  -jmax=${AWG_JMAX} \
+  -s1=${AWG_S1} \
+  -s2=${AWG_S2} \
+  -h1=${AWG_H1} \
+  -h2=${AWG_H2} \
+  -h3=${AWG_H3} \
+  -h4=${AWG_H4} \
+  -xray-pubkey=${XRAY_PUBLIC_KEY} \
+  -xray-shortid=${XRAY_SHORT_ID} \
+  -xray-sni=${XRAY_SNI} \
+  -xray-port=${XRAY_PORT}
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

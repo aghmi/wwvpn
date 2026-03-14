@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS connections;
+DROP TABLE IF EXISTS subscriptions;
+DROP TABLE IF EXISTS servers;
+DROP TABLE IF EXISTS devices;

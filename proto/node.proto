@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package node;
+
+option go_package = "github.com/wwvpn/wwvpn/internal/node/pb";
+
+service NodeAgent {
+  rpc AddPeer(AddPeerRequest) returns (AddPeerResponse);
+  rpc RemovePeer(RemovePeerRequest) returns (RemovePeerResponse);
+  rpc ListPeers(ListPeersRequest) returns (ListPeersResponse);
+  rpc HealthCheck(HealthRequest) returns (HealthResponse);
+}
+
+message AddPeerRequest {
+  string protocol = 1;
+  string client_public_key = 2;
+  string device_uuid = 3;
+}
+
+message AddPeerResponse {
+  string server_public_key = 1;
+  string endpoint = 2;
+  string allowed_ips = 3;
+  string dns = 4;
+  string assigned_ip = 5;
+  int32 jc = 6;
+  int32 jmin = 7;
+  int32 jmax = 8;
+  int32 s1 = 9;
+  int32 s2 = 10;
+  int32 h1 = 11;
+  int32 h2 = 12;
+  int32 h3 = 13;
+  int32 h4 = 14;
+  string vless_uuid = 15;
+  string vless_public_key = 16;
+  string vless_short_id = 17;
+  string vless_sni = 18;
+  int32 vless_port = 19;
+}
+
+message RemovePeerRequest {
+  string protocol = 1;
+  string client_public_key = 2;
+  string vless_uuid = 3;
+}
+
+message RemovePeerResponse {
+  bool success = 1;
+}
+
+message ListPeersRequest {}
+
+message ListPeersResponse {
+  int32 active_count = 1;
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+  bool healthy = 1;
+  string version = 2;
+}
