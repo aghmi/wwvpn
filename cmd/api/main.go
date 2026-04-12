@@ -1,4 +1,4 @@
-package main
+﻿package main
 
 import (
 	"context"
@@ -13,6 +13,7 @@ import (
 	"github.com/wwvpn/wwvpn/internal/node"
 	"github.com/wwvpn/wwvpn/internal/repository"
 	"github.com/wwvpn/wwvpn/internal/service"
+	"github.com/wwvpn/wwvpn/internal/service/iap"
 
 	_ "github.com/wwvpn/wwvpn/docs"
 )
@@ -51,7 +52,9 @@ func main() {
 
 	authService := service.NewAuthService(deviceRepo, jwtManager)
 	serverService := service.NewServerService(serverRepo, connRepo)
-	subService := service.NewSubscriptionService(subRepo, connRepo)
+	appleValidator := iap.NewAppleValidatorFromEnv()
+	googleValidator := iap.NewGoogleValidatorFromEnv()
+	subService := service.NewSubscriptionService(subRepo, connRepo, appleValidator, googleValidator)
 	vpnService := service.NewVPNService(serverRepo, connRepo, node.DefaultClientFactory)
 
 	healthMonitor := service.NewHealthMonitor(serverRepo, node.DefaultClientFactory)
@@ -70,7 +73,6 @@ func main() {
 		subHandler,
 		adminHandler,
 		jwtManager,
-		subService,
 		cfg.Admin.APIKey,
 	)
 
@@ -81,3 +83,4 @@ func main() {
 		log.Fatalf("failed to start server: %v", err)
 	}
 }
+

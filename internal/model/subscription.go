@@ -10,9 +10,14 @@ type Subscription struct {
 	ID           uuid.UUID `db:"id" json:"id"`
 	DeviceID     uuid.UUID `db:"device_id" json:"device_id"`
 	RevenueCatID string    `db:"revenuecat_id" json:"revenuecat_id"`
+	StoreTxID    string    `db:"store_transaction_id" json:"store_transaction_id"`
+	Platform     string    `db:"platform" json:"platform"`
+	ProductID    string    `db:"product_id" json:"product_id"`
 	Plan         string    `db:"plan" json:"plan"`
 	Status       string    `db:"status" json:"status"`
 	ExpiresAt    time.Time `db:"expires_at" json:"expires_at"`
+	Environment  *string   `db:"environment" json:"environment,omitempty"`
+	RawReceipt   *string   `db:"raw_receipt" json:"raw_receipt,omitempty"`
 	CreatedAt    time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt    time.Time `db:"updated_at" json:"updated_at"`
 }

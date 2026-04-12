@@ -1,4 +1,4 @@
-package api
+﻿package api
 
 import (
 	"time"
@@ -9,7 +9,6 @@ import (
 	"github.com/wwvpn/wwvpn/internal/api/handler"
 	"github.com/wwvpn/wwvpn/internal/api/middleware"
 	"github.com/wwvpn/wwvpn/internal/crypto"
-	"github.com/wwvpn/wwvpn/internal/service"
 )
 
 type Router struct {
@@ -20,7 +19,6 @@ type Router struct {
 	subHandler     *handler.SubscriptionHandler
 	adminHandler   *handler.AdminHandler
 	jwtManager     *crypto.JWTManager
-	subService     *service.SubscriptionService
 	adminAPIKey    string
 }
 
@@ -31,7 +29,6 @@ func NewRouter(
 	subHandler *handler.SubscriptionHandler,
 	adminHandler *handler.AdminHandler,
 	jwtManager *crypto.JWTManager,
-	subService *service.SubscriptionService,
 	adminAPIKey string,
 ) *Router {
 	return &Router{
@@ -41,7 +38,6 @@ func NewRouter(
 		subHandler:     subHandler,
 		adminHandler:   adminHandler,
 		jwtManager:     jwtManager,
-		subService:     subService,
 		adminAPIKey:    adminAPIKey,
 	}
 }
@@ -68,14 +64,10 @@ func (r *Router) Setup(mode string) *gin.Engine {
 		protected.DELETE("/auth/account", r.authHandler.DeleteAccount)
 		protected.GET("/servers", r.serverHandler.ListServers)
 		protected.GET("/subscription/status", r.subHandler.Status)
+		protected.POST("/subscription/verify-receipt", r.subHandler.VerifyReceipt)
 
 		protected.POST("/connect/disconnect", r.connectHandler.Disconnect)
-
-		connect := protected.Group("/connect")
-		connect.Use(middleware.RequireSubscription(r.subService))
-		{
-			connect.POST("", r.connectHandler.Connect)
-		}
+		protected.POST("/connect", r.connectHandler.Connect)
 	}
 
 	v1.POST("/webhook/revenuecat", r.subHandler.RevenueCatWebhook)

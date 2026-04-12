@@ -37,6 +37,7 @@ func setupTestDB(t *testing.T) *sqlx.DB {
 		postgres.WithInitScripts(
 			filepath.Join(migrationsDir(), "000001_init.up.sql"),
 			filepath.Join(migrationsDir(), "000002_connections_keys.up.sql"),
+			filepath.Join(migrationsDir(), "000003_iap_subscriptions.up.sql"),
 		),
 		testcontainers.WithWaitStrategy(
 			wait.ForListeningPort("5432/tcp").WithStartupTimeout(60*time.Second),
@@ -195,6 +196,9 @@ func TestSubscriptionRepo_Integration(t *testing.T) {
 		DeviceID:     device.ID,
 		RevenueCatID: "rc-123",
 		Plan:         model.PlanMonthly,
+		StoreTxID:    "legacy-test-store-tx-1",
+		Platform:     "legacy",
+		ProductID:    model.PlanMonthly,
 		Status:       model.StatusActive,
 		ExpiresAt:    time.Now().Add(30 * 24 * time.Hour),
 	}

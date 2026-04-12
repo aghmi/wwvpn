@@ -16,7 +16,7 @@ import (
 func TestSubscriptionService_CanConnect_Active(t *testing.T) {
 	subRepo := new(mockRepo.SubscriptionRepo)
 	connRepo := new(mockRepo.ConnectionRepo)
-	svc := NewSubscriptionService(subRepo, connRepo)
+	svc := NewSubscriptionService(subRepo, connRepo, nil, nil)
 	ctx := context.Background()
 	deviceID := uuid.New()
 
@@ -38,7 +38,7 @@ func TestSubscriptionService_CanConnect_Active(t *testing.T) {
 func TestSubscriptionService_CanConnect_LimitReached(t *testing.T) {
 	subRepo := new(mockRepo.SubscriptionRepo)
 	connRepo := new(mockRepo.ConnectionRepo)
-	svc := NewSubscriptionService(subRepo, connRepo)
+	svc := NewSubscriptionService(subRepo, connRepo, nil, nil)
 	ctx := context.Background()
 	deviceID := uuid.New()
 
@@ -60,7 +60,7 @@ func TestSubscriptionService_CanConnect_LimitReached(t *testing.T) {
 func TestSubscriptionService_CanConnect_NoSubscription(t *testing.T) {
 	subRepo := new(mockRepo.SubscriptionRepo)
 	connRepo := new(mockRepo.ConnectionRepo)
-	svc := NewSubscriptionService(subRepo, connRepo)
+	svc := NewSubscriptionService(subRepo, connRepo, nil, nil)
 	ctx := context.Background()
 	deviceID := uuid.New()
 
@@ -73,7 +73,7 @@ func TestSubscriptionService_CanConnect_NoSubscription(t *testing.T) {
 func TestSubscriptionService_CanConnect_AnnualPlan3Conns(t *testing.T) {
 	subRepo := new(mockRepo.SubscriptionRepo)
 	connRepo := new(mockRepo.ConnectionRepo)
-	svc := NewSubscriptionService(subRepo, connRepo)
+	svc := NewSubscriptionService(subRepo, connRepo, nil, nil)
 	ctx := context.Background()
 	deviceID := uuid.New()
 
@@ -95,7 +95,7 @@ func TestSubscriptionService_CanConnect_AnnualPlan3Conns(t *testing.T) {
 func TestSubscriptionService_GetActive(t *testing.T) {
 	subRepo := new(mockRepo.SubscriptionRepo)
 	connRepo := new(mockRepo.ConnectionRepo)
-	svc := NewSubscriptionService(subRepo, connRepo)
+	svc := NewSubscriptionService(subRepo, connRepo, nil, nil)
 	ctx := context.Background()
 	deviceID := uuid.New()
 

@@ -2,9 +2,11 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/wwvpn/wwvpn/internal/api/dto"
 	"github.com/wwvpn/wwvpn/internal/api/middleware"
 	"github.com/wwvpn/wwvpn/internal/service"
 )
@@ -37,11 +39,47 @@ func (h *SubscriptionHandler) Status(c *gin.Context) {
 		return
 	}
 
+	plan := sub.Plan
+	if sub.ProductID != "" {
+		plan = sub.ProductID
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":     sub.Status,
-		"plan":       sub.Plan,
-		"expires_at": sub.ExpiresAt,
+		"plan":       plan,
+		"expires_at": sub.ExpiresAt.Format(time.RFC3339),
 	})
+}
+
+func (h *SubscriptionHandler) VerifyReceipt(c *gin.Context) {
+	deviceUUIDStr, _ := c.Get(middleware.ContextDeviceUUID)
+	deviceUUID, err := uuid.Parse(deviceUUIDStr.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid device id"})
+		return
+	}
+
+	var req dto.VerifyReceiptRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	resp, httpStatus, vErr := h.subService.VerifyReceipt(c.Request.Context(), deviceUUID, req.Platform, req.Receipt, req.ProductID)
+	if vErr != nil {
+		if httpStatus == 422 {
+			c.JSON(httpStatus, gin.H{
+				"status": "invalid",
+				"plan":   "",
+				"error":  vErr.Error(),
+			})
+			return
+		}
+		c.JSON(httpStatus, gin.H{"error": vErr.Error()})
+		return
+	}
+
+	c.JSON(httpStatus, resp)
 }
 
 // @Summary RevenueCat webhook

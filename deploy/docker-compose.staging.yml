@@ -12,6 +12,7 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ../migrations/000001_init.up.sql:/docker-entrypoint-initdb.d/001_init.sql
       - ../migrations/000002_connections_keys.up.sql:/docker-entrypoint-initdb.d/002_connections_keys.sql
+      - ../migrations/000003_iap_subscriptions.up.sql:/docker-entrypoint-initdb.d/003_iap_subscriptions.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER}"]
       interval: 5s
